@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>CORS test</title>
+  <style>
+    * {
+      font-family: arial, verdana, sans-serif;
+    }
+
+    body { margin: 0 }
+
+    h1, h2, h3, h4, h5, h6 { font-weight:normal }
+
+    img, iframe { border: 0 }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container form {
+      text-align: center;
+    }
+
+    form input, form button {
+      padding: .5em
+    }
+
+    form input {
+      width: 220px;
+    }
+
+    iframe {
+      display: block;
+      height: 405px;
+      width: 720px;
+      border: 1px solid #ccc;
+    }
+
+    .mt-1 {
+      margin-top: .25rem !important
+    }
+
+    .mt-2 {
+      margin-top: .50rem !important
+    }
+
+    .mt-3 {
+      margin-top: 1rem !important
+    }
+
+    .mt-4 {
+      margin-top: 1.5rem !important
+    }
+
+    .ml-1 {
+      margin-left: 0.25rem !important
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <form>
+      <input type="url" name="url" id="url" placeholder="Paste your embeddable URL here" />
+      <button type="submit">
+        Embed
+      </button>
+    </form>
+    <div class="mt-2">
+      <button id="minus" type="button" title="Decrease the frame size">-</button>
+      <button id="plus" class="ml-1" type="button" title="Increase the frame size">+</button>
+    </div>
+    <iframe class="mt-2" id="frame" src=""></iframe>
+  </div>
+  <script>
+    const $ = s => document.querySelector(s)
+
+    const $frame = $('#frame')
+    const $minus = $('#minus')
+    const $plus = $('#plus')
+    let height = localStorage.getItem('height')
+    let width = localStorage.getItem('width')
+
+    if (height && width) {
+      $frame.style.height = height + 'px'
+      $frame.style.width = width + 'px'
+    }
+
+    $('form').addEventListener('submit', (e) => {
+      e.preventDefault()
+
+      $frame.src = $('#url').value.trim()
+    })
+
+    $minus.addEventListener('click', minusHandler)
+    longPress($minus, minusHandler)
+    $plus.addEventListener('click', plusHandler)
+    longPress($plus, plusHandler)
+
+    const observer = new MutationObserver((mutations) => {
+      const width = $frame.offsetWidth
+      const height = (width / 16) * 9
+
+      $frame.style.height = height + 'px'
+
+      localStorage.setItem('height', height)
+      localStorage.setItem('width', width)
+    })
+
+    observer.observe($frame, { attributes: true })
+
+    function minusHandler (e) {
+      $frame.style.width = ($frame.offsetWidth - 10) + 'px'
+    }
+
+    function plusHandler (e) {
+      $frame.style.width = ($frame.offsetWidth + 10) + 'px'
+    }
+
+    function longPress ($el, cb) {
+      let pressTimer
+
+      $el.addEventListener('mouseup', () => {
+        clearTimeout(pressTimer)
+        return false
+      })
+
+      $el.addEventListener('mousedown', function () {
+        pressTimer = setInterval(() => {
+          cb()
+        },100)
+
+        return false
+      })
+    }
+  </script>
+</body>
+</html>
